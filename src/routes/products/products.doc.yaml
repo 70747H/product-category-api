@@ -1,0 +1,354 @@
+tags:
+  - name: Products
+    description: Everything about Products
+paths:
+  /products:
+    get:
+      description: List all products
+      summary: List all products
+      tags:
+        - Products
+      operationId: productslist
+      security:
+        - Bearer: []
+      deprecated: false
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: page
+          in: query
+          type: number
+          format: integer
+          default: 1
+        - name: search
+          in: query
+          type: string
+        - name: name
+          in: query
+          type: string
+        - name: category_id
+          in: query
+          type: number
+          format: integer
+          default: 1
+      responses:
+        200:
+          $ref: '#/components/responses/Success/Multiple'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        5xx:
+          $ref: '#/components/responses/Unexpected'
+
+  /products/{id}:
+    patch:
+      description: Update an product
+      summary: Update an product
+      tags:
+        - Products
+      operationId: productsupdate
+      deprecated: false
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      requestBody:
+        required: true
+        nullable: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  required: false
+                  example: product A
+                image_uri:
+                  type: string
+                  required: false
+                  example: http://images/products/product_a.png
+                is_featured:
+                  type: boolean
+                  required: false
+                  example: false
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  isError:
+                    type: boolean
+                    example: false
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: product A
+                      image_uri:
+                        type: string
+                        example: http://images/products/product_a.png
+                      is_featured:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      deleted_at:
+                        type: string
+                        format: date-time
+                        example: null
+                      category_id:
+                        type: integer
+                        example: 1
+                      price:
+                        type: integer
+                        example: 1
+                      available:
+                        type: boolean
+                        example: false
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        5xx:
+          $ref: '#/components/responses/Unexpected'
+
+
+# Descriptions of common components
+components:
+  responses:
+    Success:
+      One:
+        description:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  example: 200
+                isError:
+                  type: boolean
+                  example: false
+                status:
+                  type: string
+                  example: OK
+                message:
+                  type: string
+                  example: success
+                data:
+                  $ref: '#/components/schemas/Product'
+      Multiple:
+        description:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  example: 200
+                isError:
+                  type: boolean
+                  example: false
+                status:
+                  type: string
+                  example: OK
+                message:
+                  type: string
+                  example: success
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Product'
+                page_info:
+                  $ref: '#/components/schemas/PageInfo'
+
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            allOf:     # Combines the BasicErrorModel and the inline model
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 404
+                  status:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: Not Found
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            allOf:     # Combines the BasicErrorModel and the inline model
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  status:
+                    type: string
+                    example: Bad Request
+                  message:
+                    type: string
+                    example: Area with same name already exists not
+    Unauthorized:
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            allOf:     # Combines the BasicErrorModel and the inline model
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 401
+                  status:
+                    type: string
+                    example: Unauthorized
+                  message:
+                    type: string
+                    example: Unauthorized
+    Unexpected:
+      description: Unexpected error.
+      content:
+        application/json:
+          schema:
+            allOf:     # Combines the BasicErrorModel and the inline model
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  status:
+                    type: string
+                    example: Internal Server Error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  schemas:
+    # Schema for success response body
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: product A
+        image_uri:
+          type: string
+          example: http://images/products/product_a.png
+        is_featured:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          example: null
+        category_id:
+          type: integer
+          example: 1
+        price:
+          type: integer
+          example: 1
+        available:
+          type: boolean
+          example: false
+    PageInfo:
+      type: object
+      properties:
+        page_count:
+          type: integer
+          format: int32
+          example: 1
+        current_page:
+          type: integer
+          format: int32
+          example: 1
+        next_page:
+          type: integer
+          format: int32
+          nullable: true
+          example: 2
+        item_count:
+          type: integer
+          format: int32
+          example: 50
+        total_count:
+          type: integer
+          format: int32
+          example: 50
+    # Schema for error response body
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        isError:
+          type: boolean
+          example: true
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          type: number
+          nullable: true
+          example: null
